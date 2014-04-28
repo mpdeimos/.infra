@@ -29,7 +29,7 @@ then
 fi
 
 
-if [[ ! -f $2 ]]
+if [[ ! -n $2 ]]
 then
 	echo "No valid path: '$2'."
 	exit 1
@@ -38,7 +38,7 @@ fi
 echo "Uploading '$1' to '$2'"
 
 # ensure dir exists
-curl -sS -u $SMARTFILE_AUTH -X PUT "https://app.smartfile.com/api/2/path/oper/mkdir/$UPLOAD_DIR" 1>/dev/null
+curl -sS -u $SMARTFILE_AUTH -X PUT "https://app.smartfile.com/api/2/path/oper/mkdir/$2" 1>/dev/null
 
 #upload file
-curl -sS -u $SMARTFILE_AUTH -F file=@"$1" "https://app.smartfile.com/api/2/path/oper/mkdir/$UPLOAD_DIR" 1>/dev/null
+curl -sS -u $SMARTFILE_AUTH -F file=@"$1" "https://app.smartfile.com/api/2/path/data/$2" 1>/dev/null

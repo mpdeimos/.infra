@@ -5,7 +5,7 @@
 #
 # Publishes a file on smartfile using the default build path.
 # This is:
-# * unstable builds (branches): dev/[repo]/unstable/[branch]/[buildid]
+# * unstable builds (branches): dev/[repo]/unstable/[branch]/[build_id]-[git_tag]
 # * stable build (tags): dev/[repo]/stable/[tag]
 #
 # Usage
@@ -24,15 +24,16 @@ then
 	exit 1
 fi
 
+TAG=`git describe --always`
+
 # Default upload dir, if on a branch.
-UPLOAD_DIR="dev/$TRAVIS_REPO_SLUG/unstable/${TRAVIS_BRANCH}/${TRAVIS_BUILD_NUMBER}"
+UPLOAD_DIR="dev/$TRAVIS_REPO_SLUG/unstable/${TRAVIS_BRANCH}/${TRAVIS_BUILD_NUMBER}-${TAG}"
 
 # If we are building a release, the repo slug is the tag name.
 # The tag name is yielded by git describe, iff the current commit is a tag.
-TAG=`git describe`
-if [[ $TAG == $TRAVIS_REPO_SLUG ]]
+if [[ $TAG == $TRAVIS_BRANCH ]]
 then
 	UPLOAD_DIR="dev/$TRAVIS_REPO_SLUG/stable/${TAG}"
-else
+fi
 
-./upload $1 $UPLOAD_DIR
+$(dirname $BASH_SOURCE)/upload $1 $UPLOAD_DIR
