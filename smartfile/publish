@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# smartfile/publish
+# =================
+#
+# Publishes a file on smartfile using the default build path.
+# This is:
+# * unstable builds (branches): dev/[repo]/unstable/[branch]/[buildid]
+# * stable build (tags): dev/[repo]/stable/[tag]
+#
+# Usage
+# -----
+# publish <auth-token> <file>
+#
+# Environment
+# -----------
+# SMARTFILE_AUTH: Smartfile credentials
+
+set -e
+
+if [[ ! -f $1 ]]
+then
+	echo "No valid file: '$1'."
+	exit 1
+fi
+
+# Default upload dir, if on a branch.
+UPLOAD_DIR="dev/$TRAVIS_REPO_SLUG/unstable/${TRAVIS_BRANCH}/${TRAVIS_BUILD_NUMBER}"
+
+# If we are building a release, the repo slug is the tag name.
+# The tag name is yielded by git describe, iff the current commit is a tag.
+TAG=`git describe`
+if [[ $TAG == $TRAVIS_REPO_SLUG ]]
+then
+	UPLOAD_DIR="dev/$TRAVIS_REPO_SLUG/stable/${TAG}"
+else
+
+./upload $1 $UPLOAD_DIR
