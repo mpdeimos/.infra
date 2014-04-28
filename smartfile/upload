@@ -1,0 +1,24 @@
+#!/bin/bash
+set -e
+
+if [[ ! -n $SMARTFILE_AUTH ]]
+then
+	echo "No auth token provided."
+	exit 1
+fi
+
+if [[ ! -f $1 ]]
+then
+	echo "No valid file: '$1'."
+	exit 1
+fi
+
+UPLOAD_DIR="dev/$TRAVIS_REPO_SLUG/${TRAVIS_BRANCH}/build/${TRAVIS_BUILD_NUMBER}"
+
+echo "Uploading '$1' to '$UPLOAD_DIR'"
+
+# ensure dir exists
+curl -sS -u $SMARTFILE_AUTH -X PUT  https://app.smartfile.com/api/2/path/oper/mkdir/$UPLOAD_DIR 1>/dev/null
+
+#upload file
+curl -sS -u $SMARTFILE_AUTH -F file=@"$1"  https://app.smartfile.com/api/2/path/data/$UPLOAD_DIR 1>/dev/null
