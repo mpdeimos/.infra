@@ -3,18 +3,14 @@
 # smartfile/publish
 # =================
 #
-# Publishes a file on smartfile using the default build path.
+# Publishes a file using the default build path.
 # This is:
 # * unstable builds (branches): dev/[repo]/unstable/[branch]/[build_id]-[git_tag]
 # * stable build (tags): dev/[repo]/stable/[tag]
 #
 # Usage
 # -----
-# publish <auth-token> <file>
-#
-# Environment
-# -----------
-# SMARTFILE_AUTH: Smartfile credentials
+# publish <file>
 
 set -e
 

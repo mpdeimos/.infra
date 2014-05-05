@@ -1,0 +1,172 @@
+<project
+	name="common"
+	basedir="." 
+	default="help">
+	
+	<dirname property="${ant.dir.common}" file="${ant.file.common}"/>
+	
+	<!-- Loads ivy tasks -->
+	<import file="./common-ivy.xml"/>
+	
+	<property environment="env"/>
+	
+	<target name="help">
+		<java classname="org.apache.tools.ant.Main">
+			<arg value="-projecthelp" />
+		</java>
+	</target>
+	
+	<macrodef name="compile">
+		<attribute name="conf" default="*"/>
+		<element name="additional-classpath" optional="yes"/>
+		<sequential>
+			<mkdir dir="./bin/@{conf}/java" />
+
+			<javac destdir="./bin/@{conf}/java" debug="true" source="1.6" target="1.6" includeantruntime="false">
+				<src path="./src/@{conf}/java"/>
+				<classpath>
+					<fileset dir="./lib/@{conf}/java" includes="*.jar" />
+					<additional-classpath/>
+				</classpath>
+			</javac>
+		</sequential>
+	</macrodef>
+	
+	<target name="clean-lib" description="Clean the project libraries directory (dependencies)">
+        <delete includeemptydirs="true" dir="./lib"/>
+    </target>
+
+	<target name="clean-build" description="Clean build output">
+		<delete dir="./bin" />
+	</target>
+	
+	<target name="clean" depends="clean-lib,clean-build" description="Clean all"/>
+
+    <target name="deps-main" description="Retrieve main dependencies with ivy">
+    	<ivy-retrieve conf="main"/>
+    </target>
+    
+    <target name="deps-test" description="Retrieve main dependencies with ivy">
+    	<ivy-retrieve conf="test"/>
+    </target>
+    
+    <target name="deps" depends="deps-main, deps-test" description="Retrieve all dependencies with ivy"/>
+
+	<target name="compile-main" depends="deps-main" description="Compile classes">
+		<compile conf="main"/>
+	</target>
+
+	<target name="compile-test" depends="compile-main,deps-test" description="Compile classes">
+		<compile conf="test">
+			<additional-classpath>
+				<path location="./bin/main/java" />
+			</additional-classpath>
+		</compile>
+	</target>
+	
+	<target name="build" depends="compile-main" />
+	
+	<target name="test" depends="compile-test">
+		<mkdir dir="./bin/test/result"/>
+		<junit printsummary="yes" fork="no" haltonfailure="yes">
+			<classpath>
+				<fileset dir="./lib/test/java" includes="*.jar" />
+				<path location="./bin/test/java" />
+				<path location="./bin/main/java" />
+			</classpath>
+			<formatter type="plain" />
+			<batchtest todir="./bin/test/result">
+				<fileset dir="./src/test/java"/>
+			</batchtest>
+		</junit>
+	</target>
+	
+	<target name="git-info" >
+		<exec executable="git" outputproperty="git.branch">
+			<arg value="name-rev"/>
+			<arg value="--name-only"/>
+			<arg value="HEAD"/>
+		</exec>
+		<exec executable="git" outputproperty="git.revision">
+			<arg value="rev-parse"/>
+			<arg value="--short"/>
+			<arg value="HEAD"/>
+		</exec>
+		<exec executable="git" outputproperty="git.count">
+			<arg value="rev-list"/>
+			<arg value="--count"/>
+			<arg value="--all"/>
+		</exec>
+		<exec executable="git" outputproperty="git.tag">
+			<arg value="describe"/>
+			<arg value="--always"/>
+			<arg value="--abbrev=0"/>
+		</exec>
+		<exec executable="git" outputproperty="git.describe">
+			<arg value="describe"/>
+			<arg value="--always"/>
+		</exec>
+		<exec executable="git" outputproperty="git.describe.long">
+			<arg value="describe"/>
+			<arg value="--always"/>
+			<arg value="--long"/>
+		</exec>
+	</target>
+	
+	<target name="project-info" >
+
+		<loadfile srcfile="./README.md" property="readme.title">
+			<filterchain>
+				<headfilter lines="1"/>
+				<tokenfilter>
+					<linetokenizer/>
+					<replaceregex pattern="([^\[]+).*" replace="\1"/>
+					<trim/>
+				</tokenfilter>
+			</filterchain>
+		</loadfile>
+		<loadfile srcfile="./README.md" property="readme.description">
+			<filterchain>
+				<tokenfilter>
+					<linetokenizer/>
+					<trim/>
+					<ignoreblank/>
+				</tokenfilter>
+				<headfilter lines="1" skip="2"/>
+			</filterchain>
+		</loadfile>
+	</target>
+	
+	<target name="jar" description="Create Jars" depends="build,git-info,project-info">
+
+		<mkdir dir="./bin/main/jar" />
+		
+		<property name="build.jar" value="./bin/main/jar/${ivy.organisation}.${ivy.module}.jar"/>
+
+		<jar jarfile="${build.jar}">
+			<manifest>
+				<section name="${ivy.organisation}/${ivy.module}">
+					<attribute name="Class-Path" value="." />
+					<attribute name="Specification-Title" value="${readme.title}" />
+					<attribute name="Specification-Version" value="${git.tag}" />
+					<attribute name="Specification-Vendor" value="Martin Pöhlmann" />
+					<attribute name="Implementation-Title" value="${ivy.organisation}.${ivy.module}" />
+					<attribute name="Implementation-Version" value="${git.describe.long}" />
+					<attribute name="Implementation-Vendor" value="Martin Pöhlmann" />
+				</section>
+			</manifest>
+			<fileset dir="./bin/main/java" includes="**/*" />
+			<fileset dir="./src/main/java" includes="**/*.prototype" />
+		</jar>
+
+	</target>
+	
+	<target name="publish" description="Publish Jars" depends="jar" if="env.CI">
+
+		<exec executable="./.infra/smartfile/publish" failonerror="true">
+			<arg value="${build.jar}"/>
+		</exec>
+
+	</target>
+
+</project>

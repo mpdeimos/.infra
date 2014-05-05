@@ -1,0 +1,36 @@
+<project
+	xmlns:ivy="antlib:org.apache.ivy.ant"
+	name="common.ivy"
+	basedir=".">
+
+    <property name="ivy.install.version" value="2.4.0-rc1" />
+    <property name="ivy.home" value="${user.home}/.ant" />
+    
+    <macrodef name="ivy-retrieve">
+		<attribute name="conf" default="*"/>
+		<sequential>
+			<ivy:retrieve pattern="./lib/[conf]/java/[artifact].[ext]" type="jar" changing="false" conf="@{conf}"/>
+		</sequential>
+	</macrodef>
+    
+    <target name="ivy-get">
+        <mkdir dir="${ivy.home}/lib"/>
+        <get src="http://repo2.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar" 
+             dest="${ivy.home}/lib/ivy.jar" usetimestamp="true"/>
+    </target>
+    
+    <target name="ivy-info">
+        <ivy:info/>
+    </target>
+    
+    <target name="ivy-publish" depends="clean, build, jar" description="Publish this project in the ivy repository">
+    	<ivy:publish artifactspattern="./bin/jars/[artifact].[ext]" 
+    			           resolver="shared"
+    			           pubrevision="latest" 
+    			           status="release"
+    					   overwrite="true"
+    	/>
+        <echo message="Released with version ${git.revision}" />
+    </target>
+
+</project>
