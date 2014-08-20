@@ -30,16 +30,17 @@ then
 	exit 1
 fi
 
-TAG=`git describe --always`
-
+TAG=`git describe --tags --always --match version/*`
+VERSION=${TAG#version/}
+	
 # Default upload dir, if on a branch.
-UPLOAD_DIR="dev/$TRAVIS_REPO_SLUG/unstable/${TRAVIS_BRANCH}/${TRAVIS_BUILD_NUMBER}-${TAG}"
+UPLOAD_DIR="dev/$TRAVIS_REPO_SLUG/unstable/${TRAVIS_BRANCH}/${TRAVIS_BUILD_NUMBER}-${VERSION}"
 
 # If we are building a release, the repo slug is the tag name.
 # The tag name is yielded by git describe, iff the current commit is a tag.
 if [[ $TAG == $TRAVIS_BRANCH ]]
 then
-	UPLOAD_DIR="dev/$TRAVIS_REPO_SLUG/stable/${TAG}"
+	UPLOAD_DIR="dev/$TRAVIS_REPO_SLUG/stable/${VERSION}"
 fi
 
 $(dirname $BASH_SOURCE)/upload $1 $UPLOAD_DIR
