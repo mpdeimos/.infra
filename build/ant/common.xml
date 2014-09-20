@@ -163,7 +163,7 @@
 	
 	<target name="publish" description="Publish Jars" depends="jar" if="env.CI">
 
-		<exec executable="./.infra/smartfile/publish" failonerror="true">
+		<exec executable="./.infra/build/bash/publish" failonerror="true">
 			<arg value="${build.jar}"/>
 		</exec>
 
