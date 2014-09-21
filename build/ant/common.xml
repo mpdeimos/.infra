@@ -68,14 +68,15 @@
 	
 	<target name="test" depends="compile-test">
 		<mkdir dir="./bin/test/result"/>
-		<junit printsummary="yes" fork="no" haltonfailure="yes">
+		<junit fork="no">
 			<classpath>
 				<fileset dir="./lib/test/java" includes="*.jar" />
 				<path location="./bin/test/java" />
 				<path location="./bin/main/java" />
 			</classpath>
-			<formatter type="plain" />
-			<batchtest todir="./bin/test/result">
+		    <formatter type="plain" usefile="false" /> <!-- to screen -->
+		    <formatter type="plain" /> <!-- to file -->
+			<batchtest todir="./bin/test/result" skipNonTests="true">
 				<fileset dir="./src/test/java"/>
 			</batchtest>
 		</junit>
