@@ -22,6 +22,7 @@
 		<sequential>
 			<mkdir dir="./bin/@{conf}/java" />
 
+			<!-- Compile classes -->
 			<javac destdir="./bin/@{conf}/java" debug="true" source="1.6" target="1.6" includeantruntime="false">
 				<src path="./src/@{conf}/java"/>
 				<classpath>
@@ -29,6 +30,11 @@
 					<additional-classpath/>
 				</classpath>
 			</javac>
+			
+			<!-- Copy any other resources -->
+			<copy todir="./bin/@{conf}/java">
+				<fileset dir="./src/@{conf}/java" excludes="**/*.java" />
+			</copy>
 		</sequential>
 	</macrodef>
 	
@@ -68,7 +74,7 @@
 	
 	<target name="test" depends="compile-test">
 		<mkdir dir="./bin/test/result"/>
-		<junit fork="no">
+		<junit fork="no" haltonfailure="true">
 			<classpath>
 				<fileset dir="./lib/test/java" includes="*.jar" />
 				<path location="./bin/test/java" />
