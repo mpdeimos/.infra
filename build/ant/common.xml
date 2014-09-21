@@ -76,8 +76,10 @@
 			</classpath>
 		    <formatter type="plain" usefile="false" /> <!-- to screen -->
 		    <formatter type="plain" /> <!-- to file -->
-			<batchtest todir="./bin/test/result" skipNonTests="true">
-				<fileset dir="./src/test/java"/>
+			<batchtest todir="./bin/test/result">
+				<!-- Can be used as soon ant 1.9.3 is available on travis -->
+				<!--fileset dir="./src/test/java" skipNonTests="true"/-->
+				<fileset dir="./src/test/java" includes="**/*Test.java"/>
 			</batchtest>
 		</junit>
 	</target>
