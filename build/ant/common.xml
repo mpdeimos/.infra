@@ -5,6 +5,7 @@
 	
 	<dirname property="ant.dir.common" file="${ant.file.common}"/>
 	
+	<property file="${basedir}/build.properties.local"/>
 	<property file="${basedir}/build.properties"/>
 	<property file="${ant.dir.common}/build.properties"/>
 	<import file="${ant.dir.common}/common-ivy.xml"/>
@@ -26,9 +27,16 @@
 			<mkdir dir="./lib/@{conf}/java/"/><!-- if module conf has no ivy dependencies -->
 
 
-			<echo>Compiling @{conf} with Java @{version}</echo>
+			<echo>Compiling @{conf} with Java @{version} ${env.JAVA_HOME}/jre/lib/rt.jar</echo>
 			<!-- Compile classes -->
-			<javac destdir="./bin/@{conf}/java" debug="true" source="@{version}" target="@{version}" compiler="javac@{version}" includeantruntime="false">
+			<javac destdir="./bin/@{conf}/java"
+				bootclasspath="${env.JAVA_HOME}/jre/lib/rt.jar"
+				debug="true"
+				source="@{version}"
+				target="@{version}"
+				compiler="javac@{version}"
+				includeantruntime="false">
+				
 				<src path="./src/@{conf}/java"/>
 				<classpath>
 					<fileset dir="./lib/@{conf}/java" includes="*.jar"/>
@@ -84,6 +92,61 @@
 				<fileset dir="./bin/@{conf}/java" includes="**/*" />
 				<additional-includes/>
 			</jar>
+		</sequential>
+	</macrodef>
+	
+	<macrodef name="assert-exists">
+		<attribute name="file"/>
+		<sequential>
+			<assert message="file '@{file}' exists">
+				<check>
+					<resourceexists>
+						<file file="@{file}"/>
+					</resourceexists>
+				</check>
+			</assert>
+		</sequential>
+	</macrodef>
+	
+	<macrodef name="assert-not-exists">
+		<attribute name="file"/>
+		<sequential>
+			<assert message="file '@{file}' does not exist">
+				<check>
+					<not>
+						<resourceexists>
+							<file file="@{file}"/>
+						</resourceexists>
+					</not>
+				</check>
+			</assert>
+		</sequential>
+	</macrodef>
+	
+	<macrodef name="assert-equals">
+		<attribute name="expected"/>
+		<attribute name="actual"/>
+		<sequential>
+			<assert message="'@{actual}' equals '@{expected}'">
+				<check>
+					<equals arg1="@{expected}" arg2="@{actual}"/>
+				</check>
+			</assert>
+		</sequential>
+	</macrodef>
+	
+	<macrodef name="assert">
+		<attribute name="message"/>
+		<element name="check" optional="yes"/>
+		<sequential>
+			<fail message="Failed asserting that @{message}.">
+				<condition>
+					<not>
+						<check/>
+					</not>
+				</condition>
+			</fail>
+			<echo message="Asserted that @{message}."/>
 		</sequential>
 	</macrodef>
 	
