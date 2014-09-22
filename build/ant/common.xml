@@ -256,7 +256,7 @@
 	<target name="publish" description="Publish Jars" depends="jar" if="env.CI">
 
 		<exec executable="./.infra/build/bash/publish" failonerror="true">
-			<arg value="${build.jar}"/>
+			<arg line="./bin/*/jar/*.jar"/>
 		</exec>
 
 	</target>

@@ -20,12 +20,6 @@ then
 	exit 0;
 fi
 
-if [[ ! -f $1 ]]
-then
-	echo "No valid file: '$1'."
-	exit 1
-fi
-
 TAG=`git describe --tags --always --match version/*`
 VERSION=${TAG#version/}
 	
@@ -39,4 +33,17 @@ then
 	UPLOAD_DIR="dev/$TRAVIS_REPO_SLUG/stable/${VERSION}"
 fi
 
-$(dirname $BASH_SOURCE)/upload $1 $UPLOAD_DIR
+files=($1)
+
+for file in "${files[@]}"
+do
+	if [[ ! -f $file ]]
+	then
+		echo "No valid file: $file"
+		exit 1
+	fi
+	
+	echo Publishing $file
+
+	$(dirname $BASH_SOURCE)/upload $file $UPLOAD_DIR
+done
