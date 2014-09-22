@@ -1,7 +1,6 @@
 <project
 	xmlns:ivy="antlib:org.apache.ivy.ant"
-	name="common.ivy"
-	basedir=".">
+	name="ivy">
 
     <property name="ivy.install.version" value="2.4.0-rc1" />
     <property name="ivy.home" value="${user.home}/.ant" />

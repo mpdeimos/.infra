@@ -1,0 +1,59 @@
+<project name="build">
+
+	<macrodef name="compile">
+		<attribute name="conf"/>
+		<attribute name="version" default="${build.version}"/>
+		<element name="additional-classpath" optional="yes"/>
+		<sequential>
+			<mkdir dir="./bin/@{conf}/java"/>
+			
+			<!-- if module conf has no ivy dependencies -->
+			<mkdir dir="./lib/@{conf}/java/"/>
+
+			<echo>Compiling @{conf} with Java @{version}</echo>
+			
+			<!-- Compile classes -->
+			<javac destdir="./bin/@{conf}/java"
+				bootclasspath="${env.JAVA_HOME}/jre/lib/rt.jar"
+				debug="true"
+				source="@{version}"
+				target="@{version}"
+				includeantruntime="false">
+				
+				<src path="./src/@{conf}/java"/>
+				<classpath>
+					<fileset dir="./lib/@{conf}/java" includes="*.jar"/>
+					<path location="${build.classpath}"/>
+					<additional-classpath/>
+				</classpath>
+			</javac>
+			
+			<!-- Copy any other resources -->
+			<copy todir="./bin/@{conf}/java">
+				<fileset dir="./src/@{conf}/java" excludes="**/*.java"/>
+			</copy>
+		</sequential>
+	</macrodef>
+
+    <extension-point name="--before-compile-main"/>
+	<extension-point name="--on-compile-main"/>
+	<extension-point name="--after-compile-main"/>
+	<target name="compile-main" depends="--before-compile-main,deps-main" description="Compile classes">
+		<antcall target="--on-deps"/>
+		<compile conf="main">
+			<additional-classpath>
+				<path location="${build.classpath.main}"/>
+			</additional-classpath>			
+		</compile>
+		<antcall target="--on-deps"/>
+	</target>
+	
+	<extension-point name="--before-build"/>
+	<extension-point name="--on-build"/>
+	<extension-point name="--after-build"/>
+	<target name="build" depends="--before-build,compile-main">
+		<antcall target="--on-build"/>
+		<antcall target="--after-build"/>
+	</target>
+
+</project>

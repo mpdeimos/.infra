@@ -1,0 +1,25 @@
+<project name="base">
+	
+	<dirname property="ant.dir.base" file="${ant.file.base}"/>
+	
+	<property file="${basedir}/build.properties.local"/>
+	<property file="${basedir}/build.properties"/>
+	<property file="${ant.dir.base}/base.properties"/>
+	
+	<import file="assert.xml"/>
+	<import file="deps.xml"/>
+	<import file="clean.xml"/>
+	<import file="compile.xml"/>
+	<import file="test.xml"/>
+	<import file="jar.xml"/>
+	<import file="publish.xml"/>
+	
+	<property environment="env"/>
+	
+	<target name="help">
+		<java classname="org.apache.tools.ant.Main">
+			<arg value="-projecthelp" />
+		</java>
+	</target>
+	
+</project>

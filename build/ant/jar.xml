@@ -1,0 +1,115 @@
+<project name="jar">
+
+	<macrodef name="create-jar">
+		<attribute name="conf" />
+		<attribute name="organisation" default="${ivy.organisation}" />
+		<attribute name="module" default="${ivy.module}" />
+		<attribute name="version" default="${git.describe.long}"/>
+		<element name="additional-includes" optional="yes"/>
+		<sequential>
+			<fail message="organisation not set">
+				<condition>
+					<length string="@{organisation}" trim="true" length="0" />
+				</condition>
+			</fail>
+		
+			<fail message="module not set">
+				<condition>
+					<length string="@{module}" trim="true" length="0" />
+				</condition>
+			</fail>
+		
+			<fail message="version not set">
+				<condition>
+					<length string="@{version}" trim="true" length="0" />
+				</condition>
+			</fail>
+			<mkdir dir="./bin/@{conf}/jar" />
+			<jar jarfile="./bin/@{conf}/jar/@{organisation}.@{module}.jar">
+				<manifest>
+					<section name="@{organisation}/@{module}">
+						<attribute name="Class-Path" value="." />
+						<attribute name="Specification-Title" value="${readme.title}" />
+						<attribute name="Specification-Version" value="${git.tag}" />
+						<attribute name="Specification-Vendor" value="Martin Pöhlmann" />
+						<attribute name="Implementation-Title" value="@{organisation}.@{module}" />
+						<attribute name="Implementation-Version" value="${git.describe.long}" />
+						<attribute name="Implementation-Vendor" value="Martin Pöhlmann" />
+					</section>
+				</manifest>
+				<fileset dir="./bin/@{conf}/java" includes="**/*" />
+				<additional-includes/>
+			</jar>
+		</sequential>
+	</macrodef>
+
+	<target name="git-info" >
+		<exec executable="git" outputproperty="git.branch">
+			<arg value="name-rev"/>
+			<arg value="--name-only"/>
+			<arg value="HEAD"/>
+		</exec>
+		<exec executable="git" outputproperty="git.revision">
+			<arg value="rev-parse"/>
+			<arg value="--short"/>
+			<arg value="HEAD"/>
+		</exec>
+		<exec executable="git" outputproperty="git.count">
+			<arg value="rev-list"/>
+			<arg value="--count"/>
+			<arg value="--all"/>
+		</exec>
+		<exec executable="git" outputproperty="git.tag">
+			<arg value="describe"/>
+			<arg value="--always"/>
+			<arg value="--abbrev=0"/>
+		</exec>
+		<exec executable="git" outputproperty="git.describe">
+			<arg value="describe"/>
+			<arg value="--always"/>
+		</exec>
+		<exec executable="git" outputproperty="git.describe.long">
+			<arg value="describe"/>
+			<arg value="--always"/>
+			<arg value="--long"/>
+		</exec>
+	</target>
+	
+	<target name="project-info" >
+
+		<loadfile srcfile="./README.md" property="readme.title">
+			<filterchain>
+				<headfilter lines="1"/>
+				<tokenfilter>
+					<linetokenizer/>
+					<replaceregex pattern="([^\[]+).*" replace="\1"/>
+					<trim/>
+				</tokenfilter>
+			</filterchain>
+		</loadfile>
+		<loadfile srcfile="./README.md" property="readme.description">
+			<filterchain>
+				<tokenfilter>
+					<linetokenizer/>
+					<trim/>
+					<ignoreblank/>
+				</tokenfilter>
+				<headfilter lines="1" skip="2"/>
+			</filterchain>
+		</loadfile>
+	</target>
+	
+	<extension-point name="--before-jar"/>
+	<extension-point name="--on-jar"/>
+	<extension-point name="--after-jar"/>
+	<target name="jar" description="Create Jars" depends="--before-jar,build,git-info,project-info">
+
+		<antcall target="--on-jar"/>
+		
+		<create-jar conf="main"/>
+		
+		<antcall target="--after-jar"/>
+
+	</target>
+	
+</project>

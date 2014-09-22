@@ -1,0 +1,19 @@
+<project name="clean">
+
+	<target name="clean-lib" description="Clean the project libraries directory (dependencies)">
+        <delete includeemptydirs="true" dir="./lib"/>
+    </target>
+
+	<target name="clean-build" description="Clean build output">
+		<delete dir="./bin" />
+	</target>
+	
+	<extension-point name="--before-clean"/>
+	<extension-point name="--on-clean"/>
+	<extension-point name="--after-clean"/>
+	<target name="clean" depends="--before-clean,clean-lib,clean-build" description="Clean all">
+		<antcall target="--on-clean"/>
+		<antcall target="--after-clean"/>
+	</target>
+	
+</project>

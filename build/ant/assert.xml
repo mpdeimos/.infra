@@ -1,0 +1,58 @@
+<project name="assert">
+	
+	<macrodef name="assert-exists">
+		<attribute name="file"/>
+		<sequential>
+			<assert message="file '@{file}' exists">
+				<check>
+					<resourceexists>
+						<file file="@{file}"/>
+					</resourceexists>
+				</check>
+			</assert>
+		</sequential>
+	</macrodef>
+	
+	<macrodef name="assert-not-exists">
+		<attribute name="file"/>
+		<sequential>
+			<assert message="file '@{file}' does not exist">
+				<check>
+					<not>
+						<resourceexists>
+							<file file="@{file}"/>
+						</resourceexists>
+					</not>
+				</check>
+			</assert>
+		</sequential>
+	</macrodef>
+	
+	<macrodef name="assert-equals">
+		<attribute name="expected"/>
+		<attribute name="actual"/>
+		<sequential>
+			<assert message="'@{actual}' equals '@{expected}'">
+				<check>
+					<equals arg1="@{expected}" arg2="@{actual}"/>
+				</check>
+			</assert>
+		</sequential>
+	</macrodef>
+	
+	<macrodef name="assert">
+		<attribute name="message"/>
+		<element name="check" optional="yes"/>
+		<sequential>
+			<fail message="Failed asserting that @{message}.">
+				<condition>
+					<not>
+						<check/>
+					</not>
+				</condition>
+			</fail>
+			<echo message="Asserted that @{message}."/>
+		</sequential>
+	</macrodef>
+
+</project>
