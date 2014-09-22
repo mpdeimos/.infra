@@ -1,10 +1,16 @@
 <project name="test">
 
-	<extension-point name="--before-compile-test"/>
-	<extension-point name="--on-compile-test"/>
-	<extension-point name="--after-compile-test"/>
-	<target name="compile-test" depends="--before-compile-test,compile-main,deps-test" description="Compile classes">
-		<antcall target="--on-compile-test"/>
+    <target description="Retrieve test dependencies with Ivy."
+    	name="deps-test">
+    	
+    	<ivy-retrieve conf="test"/>
+    </target>
+
+
+	<target description="Compile test classes."
+		name="build-test"
+		depends="@before-build-test,build-main,deps-test,@on-build-test" >
+
 		<compile conf="test">
 			<additional-classpath>
 				<path location="./bin/main/java"/>
@@ -12,18 +18,21 @@
 				<path location="${build.classpath.test}"/>
 			</additional-classpath>
 		</compile>
-		<antcall target="--on-compile-test"/>
+		
+		<antcall target="@after-build-test"/>
 	</target>
+	
+	<extension-point name="@before-build-test"/>
+	<extension-point name="@on-build-test"/>
+	<extension-point name="@after-build-test"/>
 
-	<extension-point name="--before-test"/>
-	<extension-point name="--on-test"/>
-	<extension-point name="--after-test"/>
-	<target name="test" depends="--before-test,compile-test">
+
+	<target description="Executes tests for the project."
+		name="test"
+		depends="@before-test,build-test,@on-test">
 	
 		<mkdir dir="./bin/test/result"/>
-		
-		<antcall target="--on-test"/>
-		
+				
 		<junit fork="no" haltonfailure="true">
 			<classpath>
 				<fileset dir="./lib/test/java" includes="*.jar" />
@@ -42,7 +51,11 @@
 			</batchtest>
 		</junit>
 		
-		<antcall target="--after-test"/>
+		<antcall target="@after-test"/>
 	</target>
+	
+	<extension-point name="@before-test"/>
+	<extension-point name="@on-test"/>
+	<extension-point name="@after-test"/>
 
 </project>

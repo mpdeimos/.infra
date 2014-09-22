@@ -1,6 +1,9 @@
 <project name="publish">
 	
-	<target name="publish" description="Publish Jars" depends="jar" if="env.CI">
+	<target description="Publish JARs to an online storage."
+		name="publish" 
+		depends="jar"
+		if="env.CI">
 
 		<exec executable="./.infra/build/bash/publish" failonerror="true">
 			<arg line="./bin/*/jar/*.jar"/>

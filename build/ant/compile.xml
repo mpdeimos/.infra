@@ -34,26 +34,50 @@
 			</copy>
 		</sequential>
 	</macrodef>
+	
+	<target description="Retrieve main dependencies with Ivy."
+		name="deps-main">
+		
+    	<ivy-retrieve conf="main"/>
+    </target>
+	
+	<target description="Retrieve all dependencies with Ivy."
+    	name="deps"
+    	depends="@before-deps,deps-main,deps-test,@on-deps">
+    		
+    		<antcall target="@after-deps"/>
+    </target>
+    	
+    <extension-point name="@before-deps"/>
+	<extension-point name="@on-deps"/>
+	<extension-point name="@after-deps"/>
 
-    <extension-point name="--before-compile-main"/>
-	<extension-point name="--on-compile-main"/>
-	<extension-point name="--after-compile-main"/>
-	<target name="compile-main" depends="--before-compile-main,deps-main" description="Compile classes">
-		<antcall target="--on-deps"/>
+	<target description="Builds the main project module."
+		name="build-main"
+		depends="@before-build-main,deps-main,@on-build-main">
+		
 		<compile conf="main">
 			<additional-classpath>
 				<path location="${build.classpath.main}"/>
 			</additional-classpath>			
 		</compile>
-		<antcall target="--on-deps"/>
+		
+		<antcall target="@after-build-main"/>
 	</target>
 	
-	<extension-point name="--before-build"/>
-	<extension-point name="--on-build"/>
-	<extension-point name="--after-build"/>
-	<target name="build" depends="--before-build,compile-main">
-		<antcall target="--on-build"/>
-		<antcall target="--after-build"/>
+    <extension-point name="@before-build-main"/>
+	<extension-point name="@on-build-main"/>
+	<extension-point name="@after-build-main"/>
+	
+	<target description="Builds all project modules."
+		name="build"
+		depends="@before-build,build-main,@on-build">
+		
+		<antcall target="@after-build"/>
 	</target>
+	
+	<extension-point name="@before-build"/>
+	<extension-point name="@on-build"/>
+	<extension-point name="@after-build"/>
 
 </project>

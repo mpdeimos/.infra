@@ -7,7 +7,7 @@
 	<property file="${ant.dir.base}/base.properties"/>
 	
 	<import file="assert.xml"/>
-	<import file="deps.xml"/>
+	<import file="ivy.xml"/>
 	<import file="clean.xml"/>
 	<import file="compile.xml"/>
 	<import file="test.xml"/>
@@ -16,7 +16,9 @@
 	
 	<property environment="env"/>
 	
-	<target name="help">
+	<target description="Prints the project help."
+		name="help">
+		
 		<java classname="org.apache.tools.ant.Main">
 			<arg value="-projecthelp" />
 		</java>
