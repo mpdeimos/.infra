@@ -48,6 +48,7 @@
 				<!-- Can be used as soon ant 1.9.3 is available on travis -->
 				<!--fileset dir="./src/test/java" skipNonTests="true"/-->
 				<fileset dir="./src/test/java" includes="**/*Test.java"/>
+				<fileset dir="./src/test/java" includes="**/*Suite.java"/>
 			</batchtest>
 		</junit>
 		
